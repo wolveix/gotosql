@@ -91,6 +91,6 @@ END;
 
 ### Override Data Type Assignment
 When `gotosql` iterates over an object, it assigns the SQL data type based on this workflow (in this order):
-1. If the field has a `sqltogen` tag, use it as the SQL data type
+1. If the field has a `gotosql` tag, use it as the SQL data type
 2. If the user provided a overarching data type override when initializing the generator, use this instead
 3. Use the preconfigured SQL data typess
