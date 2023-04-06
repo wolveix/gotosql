@@ -12,7 +12,7 @@ func newMysqlGenerator() SqlGen {
 }
 
 func (g *mysqlGenerator) GetDefaultValue(sqlType string) (string, error) {
-	sqlType = stripBrackets(sqlType)
+	sqlType = strings.Split(stripBrackets(sqlType), " ")[0]
 
 	switch sqlType {
 	case "BIGINT", "BIGINT UNSIGNED", "INT", "INT UNSIGNED", "INTEGER", "INTEGER UNSIGNED", "TINYINT":

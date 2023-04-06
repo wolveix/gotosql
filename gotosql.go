@@ -75,7 +75,7 @@ func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string
 	if len(rawTableName) > 0 {
 		tableName = rawTableName[0]
 	} else {
-		tableName = strings.ToLower(obj.Name())
+		tableName = camelCase(obj.Name())
 		if !strings.HasSuffix(tableName, "s") {
 			tableName += "s"
 		}
@@ -98,13 +98,15 @@ func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string
 		}
 
 		if !g.nullDefault {
-			sqlDefault, err = g.gen.GetDefaultValue(sqlType)
-			if err != nil {
-				return "", fmt.Errorf("failed to find corresponding SQL default for field:%v; type:%v", field, types[i])
-			}
+			if !strings.Contains(sqlType, "AUTO_INCREMENT") && !strings.Contains(sqlType, "PRIMARY KEY") {
+				sqlDefault, err = g.gen.GetDefaultValue(sqlType)
+				if err != nil {
+					return "", fmt.Errorf("failed to find corresponding SQL default for field:%v; type:%v", field, types[i])
+				}
 
-			if sqlDefault != "" {
-				sqlDefault = " NOT NULL DEFAULT " + sqlDefault
+				if sqlDefault != "" {
+					sqlDefault = " NOT NULL DEFAULT " + sqlDefault
+				}
 			}
 		}
 
@@ -116,7 +118,8 @@ func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string
 
 	if history {
 		// create the table history
-		sqlStatement = append(sqlStatement, "CREATE TABLE IF NOT EXISTS "+tableName+"_history (\n"+strings.Join(sqlStmt, ",\n")+"\n);\n")
+		// remove AUTO_INCREMENT and PRIMARY KEY declarations from the history table schema
+		sqlStatement = append(sqlStatement, strings.ReplaceAll(strings.ReplaceAll("CREATE TABLE IF NOT EXISTS "+tableName+"_history (\n"+strings.Join(sqlStmt, ",\n")+"\n);\n", " AUTO_INCREMENT", ""), " PRIMARY KEY", ""))
 
 		keys := strings.Join(fields, ", ")
 		values := strings.Join(fields, ", new.")
@@ -177,10 +180,16 @@ func (g *SqlGenerator) getFields(t reflect.Type) ([]string, []string) {
 
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
+		fieldName := camelCase(field.Name)
 
-		override := field.Tag.Get("gotosql")
-		if override != "" {
-			g.overrideTypes[camelCase(field.Name)] = override
+		overrideName := field.Tag.Get("db")
+		if overrideName != "" {
+			fieldName = overrideName
+		}
+
+		overrideType := field.Tag.Get("dbType")
+		if overrideType != "" {
+			g.overrideTypes[fieldName] = strings.ToUpper(overrideType)
 		}
 
 		if field.Anonymous && field.Type.Kind() == reflect.Struct {
@@ -192,7 +201,7 @@ func (g *SqlGenerator) getFields(t reflect.Type) ([]string, []string) {
 				fieldType = field.Type.Kind().String()
 			}
 
-			names, types = append(names, camelCase(field.Name)), append(types, fieldType)
+			names, types = append(names, fieldName), append(types, fieldType)
 		}
 	}
 
