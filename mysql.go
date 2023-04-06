@@ -15,7 +15,7 @@ func (g *mysqlGenerator) GetDefaultValue(sqlType string) (string, error) {
 	sqlType = strings.Split(stripBrackets(sqlType), " ")[0]
 
 	switch sqlType {
-	case "BIGINT", "BIGINT UNSIGNED", "INT", "INT UNSIGNED", "INTEGER", "INTEGER UNSIGNED", "TINYINT":
+	case "BIGINT", "INT", "INTEGER", "TINYINT":
 		return "0", nil
 	case "DATETIME":
 		return "CURRENT_TIMESTAMP", nil
