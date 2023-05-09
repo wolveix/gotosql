@@ -11,6 +11,10 @@ func newSqliteGenerator() SqlGen {
 	return &sqliteGenerator{}
 }
 
+func (g *sqliteGenerator) GetAutoIncrementKey() string {
+	return "AUTOINCREMENT"
+}
+
 func (g *sqliteGenerator) GetDefaultValue(sqlType string) (string, error) {
 	switch sqlType {
 	case "INTEGER":

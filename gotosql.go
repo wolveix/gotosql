@@ -23,6 +23,7 @@ type (
 		overrideTypes map[string]string
 	}
 	SqlGen interface {
+		GetAutoIncrementKey() string
 		GetDefaultValue(sqlType string) (string, error)
 		GetSqlType(goType string) (string, error)
 		ValidateType(sqlType string) bool
@@ -97,8 +98,9 @@ func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string
 			}
 		}
 
-		if !g.nullDefault {
-			if !strings.Contains(sqlType, "AUTO_INCREMENT") && !strings.Contains(sqlType, "PRIMARY KEY") {
+		// exclude time.Time fields from having any NOT NULL statement
+		if !g.nullDefault && types[i] != "time.Time" {
+			if !strings.Contains(sqlType, g.gen.GetAutoIncrementKey()) && !strings.Contains(sqlType, "PRIMARY KEY") {
 				sqlDefault, err = g.gen.GetDefaultValue(sqlType)
 				if err != nil {
 					return "", fmt.Errorf("failed to find corresponding SQL default for field:%v; type:%v", field, types[i])

@@ -11,6 +11,10 @@ func newMysqlGenerator() SqlGen {
 	return &mysqlGenerator{}
 }
 
+func (g *mysqlGenerator) GetAutoIncrementKey() string {
+	return "AUTO_INCREMENT"
+}
+
 func (g *mysqlGenerator) GetDefaultValue(sqlType string) (string, error) {
 	sqlType = strings.Split(stripBrackets(sqlType), " ")[0]
 
