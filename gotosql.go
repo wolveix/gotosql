@@ -121,7 +121,7 @@ func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string
 	if history {
 		// create the table history
 		// remove AUTO_INCREMENT and PRIMARY KEY declarations from the history table schema
-		sqlStatement = append(sqlStatement, strings.ReplaceAll(strings.ReplaceAll("CREATE TABLE IF NOT EXISTS "+tableName+"_history (\n"+strings.Join(sqlStmt, ",\n")+"\n);\n", " AUTO_INCREMENT", ""), " PRIMARY KEY", ""))
+		sqlStatement = append(sqlStatement, strings.ReplaceAll(strings.ReplaceAll("CREATE TABLE IF NOT EXISTS "+tableName+"_history (\n"+strings.Join(sqlStmt, ",\n")+"\n);\n", " "+g.gen.GetAutoIncrementKey(), ""), " PRIMARY KEY", ""))
 
 		keys := strings.Join(fields, ", ")
 		values := strings.Join(fields, ", new.")

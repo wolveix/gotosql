@@ -47,8 +47,8 @@ type ExampleObject struct {
 The above code outputs this:
 ```sql
 CREATE TABLE IF NOT EXISTS exampleObjects (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    created DATETIME,
     emailAddress VARCHAR(20) NOT NULL DEFAULT '',
     forename VARCHAR(255) NOT NULL DEFAULT '',
     locked TINYINT(1) NOT NULL DEFAULT 0,
@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS exampleObjects (
 );
 
 CREATE TABLE IF NOT EXISTS exampleObjects_history (
-    id BIGINT,
-    created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id INTEGER,
+    created DATETIME,
     emailAddress VARCHAR(20) NOT NULL DEFAULT '',
     forename VARCHAR(255) NOT NULL DEFAULT '',
     locked TINYINT(1) NOT NULL DEFAULT 0,
@@ -90,7 +90,7 @@ END;
 ```
 
 ### Field Name
-If the object's field name doesn't have a `db` tag, `sqltosql` will convert the field's name to camel case and use it instead
+If the object's field name doesn't have a `db` tag, `gotosql` will convert the field's name to camel case and use it instead
 
 ### Override Data Type Assignment
 When `gotosql` iterates over an object, it assigns the SQL data type based on this workflow (in this order):
