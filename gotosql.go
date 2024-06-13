@@ -187,6 +187,11 @@ func (g *SQLGenerator) getFields(t reflect.Type) ([]string, []string) {
 		overrideName := field.Tag.Get("db")
 		if overrideName != "" {
 			fieldName = overrideName
+
+			// ignore field names specified as -
+			if fieldName == "-" {
+				continue
+			}
 		}
 
 		overrideType := field.Tag.Get("dbType")
