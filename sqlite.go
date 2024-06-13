@@ -7,7 +7,7 @@ import (
 
 type sqliteGenerator struct{}
 
-func newSqliteGenerator() SqlGen {
+func newSQLiteGenerator() SQLGen {
 	return &sqliteGenerator{}
 }
 
@@ -30,7 +30,7 @@ func (g *sqliteGenerator) GetDefaultValue(sqlType string) (string, error) {
 	return "", errors.New("unrecognized type " + sqlType)
 }
 
-func (g *sqliteGenerator) GetSqlType(goType string) (string, error) {
+func (g *sqliteGenerator) GenSQLType(goType string) (string, error) {
 	switch goType {
 	case "[]byte":
 		return "BLOB", nil

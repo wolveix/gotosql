@@ -7,7 +7,7 @@ import (
 
 type mysqlGenerator struct{}
 
-func newMysqlGenerator() SqlGen {
+func newMySQLGenerator() SQLGen {
 	return &mysqlGenerator{}
 }
 
@@ -34,7 +34,7 @@ func (g *mysqlGenerator) GetDefaultValue(sqlType string) (string, error) {
 	return "", errors.New("unrecognized type " + sqlType)
 }
 
-func (g *mysqlGenerator) GetSqlType(goType string) (string, error) {
+func (g *mysqlGenerator) GenSQLType(goType string) (string, error) {
 	switch goType {
 	case "int64":
 		return "BIGINT", nil

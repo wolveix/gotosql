@@ -9,33 +9,33 @@ import (
 )
 
 const (
-	SqlDialectMySql  = SqlDialect("MYSQL")
-	SqlDialectSqlite = SqlDialect("SQLITE")
+	SQLDialectMySQL  = SQLDialect("MYSQL")
+	SQLDialectSQLite = SQLDialect("SQLITE")
 )
 
 type (
-	SqlDialect   string
-	SqlGenerator struct {
+	SQLDialect   string
+	SQLGenerator struct {
 		customTypes   map[string]string
-		dialect       SqlDialect
-		gen           SqlGen
+		dialect       SQLDialect
+		gen           SQLGen
 		nullDefault   bool
 		overrideTypes map[string]string
 	}
-	SqlGen interface {
+	SQLGen interface {
 		GetAutoIncrementKey() string
 		GetDefaultValue(sqlType string) (string, error)
-		GetSqlType(goType string) (string, error)
+		GenSQLType(goType string) (string, error)
 		ValidateType(sqlType string) bool
 	}
 )
 
-func (d *SqlDialect) String() string {
+func (d *SQLDialect) String() string {
 	return string(*d)
 }
 
-func NewSqlGenerator(sqlDialect SqlDialect, nullDefault bool, customTypes map[string]string) (*SqlGenerator, error) {
-	generator := SqlGenerator{
+func NewSQLGenerator(sqlDialect SQLDialect, nullDefault bool, customTypes map[string]string) (*SQLGenerator, error) {
+	generator := SQLGenerator{
 		customTypes:   customTypes,
 		dialect:       sqlDialect,
 		nullDefault:   nullDefault,
@@ -43,11 +43,11 @@ func NewSqlGenerator(sqlDialect SqlDialect, nullDefault bool, customTypes map[st
 	}
 
 	switch sqlDialect {
-	case SqlDialectMySql:
-		generator.gen = newMysqlGenerator()
+	case SQLDialectMySQL:
+		generator.gen = newMySQLGenerator()
 		break
-	case SqlDialectSqlite:
-		generator.gen = newSqliteGenerator()
+	case SQLDialectSQLite:
+		generator.gen = newSQLiteGenerator()
 		break
 	default:
 		return nil, errors.New("unknown sql dialect: " + sqlDialect.String())
@@ -66,7 +66,7 @@ func NewSqlGenerator(sqlDialect SqlDialect, nullDefault bool, customTypes map[st
 	return &generator, nil
 }
 
-func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string) (string, error) {
+func (g *SQLGenerator) Generate(object any, history bool, rawTableName ...string) (string, error) {
 	obj := reflect.TypeOf(object)
 
 	var err error
@@ -92,7 +92,7 @@ func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string
 		} else if customType, ok = g.customTypes[types[i]]; ok {
 			sqlType = customType
 		} else {
-			sqlType, err = g.gen.GetSqlType(types[i])
+			sqlType, err = g.gen.GenSQLType(types[i])
 			if err != nil {
 				return "", fmt.Errorf("failed to find corresponding SQL type for field:%v; type:%v", field, types[i])
 			}
@@ -126,7 +126,7 @@ func (g *SqlGenerator) Generate(object any, history bool, rawTableName ...string
 		keys := strings.Join(fields, ", ")
 		values := strings.Join(fields, ", new.")
 
-		if g.dialect == SqlDialectSqlite {
+		if g.dialect == SQLDialectSQLite {
 			sqlStatement = append(sqlStatement, "CREATE TRIGGER IF NOT EXISTS "+tableName+"_audit BEFORE UPDATE ON "+tableName+" BEGIN INSERT INTO "+tableName+"_history (\n    "+
 				keys+"\n) VALUES (\n    new."+values+"\n);\nEND;\n")
 
@@ -177,7 +177,7 @@ func camelCase(s string) string {
 	return b.String()
 }
 
-func (g *SqlGenerator) getFields(t reflect.Type) ([]string, []string) {
+func (g *SQLGenerator) getFields(t reflect.Type) ([]string, []string) {
 	var names, types []string
 
 	for i := 0; i < t.NumField(); i++ {
